@@ -7,6 +7,7 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 
 type FieldKey = keyof z.infer<typeof SignupFormSchema>;
+const REDIRECT_DELAY_MS = 1000;
 
 export interface UseSignupFormResult {
   formRef: React.RefObject<HTMLFormElement | null>;
@@ -23,7 +24,6 @@ export interface UseSignupFormResult {
   action: (payload: FormData) => void;
 }
 
-const REDIRECT_DELAY_MS = 1500;
 
 export function useSignupForm(): UseSignupFormResult {
   const router = useRouter();

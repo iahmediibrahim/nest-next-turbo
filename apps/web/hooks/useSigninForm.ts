@@ -1,10 +1,12 @@
 "use client";
 import { signIn } from "@/lib/auth";
 import { SigninFormSchema, type FormState } from "@/lib/type";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import z from "zod";
 
 type FieldKey = keyof z.infer<typeof SigninFormSchema>;
+const REDIRECT_DELAY_MS = 1000;
 
 export interface UseSigninFormResult {
   formRef: React.RefObject<HTMLFormElement | null>;
@@ -21,6 +23,7 @@ export interface UseSigninFormResult {
 
 export function useSigninForm(): UseSigninFormResult {
   const [state, action] = useActionState(signIn, undefined);
+  const router = useRouter();
 
   const formRef = useRef<HTMLFormElement>(null);
   const valuesRef = useRef<Record<string, string>>({});
@@ -46,6 +49,15 @@ export function useSigninForm(): UseSigninFormResult {
     valuesRef.current[name] = value;
     validateField(name, value);
   };
+  const isSuccess = Boolean(state?.success);
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    const timeoutId = setTimeout(() => {
+      router.push("/");
+    }, REDIRECT_DELAY_MS);
+    return () => clearTimeout(timeoutId);
+  }, [isSuccess, router]);
 
   useEffect(() => {
     const form = formRef.current;
@@ -66,8 +78,6 @@ export function useSigninForm(): UseSigninFormResult {
     Boolean(error?.password?.length) ||
     !valuesRef.current.email ||
     !valuesRef.current.password;
-
-  const isSuccess = Boolean(state?.success);
 
   return {
     formRef,

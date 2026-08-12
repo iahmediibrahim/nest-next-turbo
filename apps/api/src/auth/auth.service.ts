@@ -22,7 +22,7 @@ export class AuthService {
     const user = await this.userService.findByEmail(email);
     if (!user) throw new UnauthorizedException('User not found');
 
-    const pwValid = await argon2.verify(password, user.password);
+    const pwValid = await argon2.verify(user.password, password);
     console.log(pwValid);
     if (!pwValid) throw new UnauthorizedException('Invalid Credentials!');
 

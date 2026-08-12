@@ -1,6 +1,7 @@
 "use server";
 import z from "zod";
 import { BACKEND_URL } from "./constants";
+import { createSession } from "./session";
 import { FormState, SigninFormSchema, SignupFormSchema } from "./type";
 
 export async function signUp(
@@ -70,7 +71,13 @@ export async function signIn(
   });
   const result = await response.json();
   if (response.ok) {
-    // TODO: create session for authenticated user s
+    //  create session for authenticated user
+    await createSession({
+      user: {
+        id: result.id,
+        name: result.name,
+      },
+    });
     return {
       ...state,
       success: true,
