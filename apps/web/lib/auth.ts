@@ -1,7 +1,9 @@
 "use server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import z from "zod";
 import { BACKEND_URL } from "./constants";
-import { createSession } from "./session";
+import { createSession, destroySession } from "./session";
 import { FormState, SigninFormSchema, SignupFormSchema } from "./type";
 
 export async function signUp(
@@ -88,4 +90,11 @@ export async function signIn(
     ...state,
     message: result.message ?? "Invalid email or password",
   };
+}
+
+export async function logOut() {
+  await destroySession();
+
+  revalidatePath("/", "layout");
+  redirect("/");
 }

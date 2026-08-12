@@ -6,7 +6,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import z from "zod";
 
 type FieldKey = keyof z.infer<typeof SigninFormSchema>;
-const REDIRECT_DELAY_MS = 1000;
+const REDIRECT_DELAY_MS = 100;
 
 export interface UseSigninFormResult {
   formRef: React.RefObject<HTMLFormElement | null>;
