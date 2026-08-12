@@ -34,7 +34,7 @@ export async function signUp(
     return {
       ...state,
       success: true,
-      message: data.message,
+      message: "Signed up successfully",
     };
   }
   return {
@@ -68,8 +68,9 @@ export async function signIn(
     }),
     credentials: "include",
   });
-  const data = await response.json();
+  const result = await response.json();
   if (response.ok) {
+    // TODO: create session for authenticated user s
     return {
       ...state,
       success: true,
@@ -78,6 +79,6 @@ export async function signIn(
   }
   return {
     ...state,
-    message: data.message ?? "Invalid email or password",
+    message: result.message ?? "Invalid email or password",
   };
 }

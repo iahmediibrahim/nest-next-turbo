@@ -1,7 +1,10 @@
+import { Serialize } from '@/interceptors/serialize.interceptor';
 import { Body, Controller, Post } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserDto } from './dto/user-dto';
 import { UserService } from './user.service';
 
+@Serialize(UserDto)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

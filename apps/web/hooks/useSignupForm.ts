@@ -2,6 +2,7 @@
 import { signUp } from "@/lib/auth";
 import { computePasswordStrength, type PasswordStrength } from "@/lib/password";
 import { SignupFormSchema, type FormState } from "@/lib/type";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 
@@ -22,7 +23,10 @@ export interface UseSignupFormResult {
   action: (payload: FormData) => void;
 }
 
+const REDIRECT_DELAY_MS = 1500;
+
 export function useSignupForm(): UseSignupFormResult {
+  const router = useRouter();
   const [state, action] = useActionState(signUp, undefined);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -59,6 +63,17 @@ export function useSignupForm(): UseSignupFormResult {
       if (input && input.value !== value) input.value = value;
     }
   }, [state]);
+  const isSuccess = Boolean(state?.success);
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    const timeoutId = setTimeout(() => {
+      router.push("/auth/signin");
+    }, REDIRECT_DELAY_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [isSuccess, router]);
 
   const togglePasswordVisibility = () => setShowPassword((p) => !p);
 
@@ -73,12 +88,7 @@ export function useSignupForm(): UseSignupFormResult {
   const isFormInvalid =
     Boolean(error?.name?.length) ||
     Boolean(error?.email?.length) ||
-    Boolean(error?.password?.length) ||
-    !valuesRef.current.name ||
-    !valuesRef.current.email ||
-    !valuesRef.current.password;
-
-  const isSuccess = Boolean(state?.success);
+    Boolean(error?.password?.length);
 
   return {
     formRef,

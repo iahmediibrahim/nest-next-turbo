@@ -30,13 +30,18 @@ const SignupForm = () => {
           <div
             role="status"
             aria-live="polite"
-            className={`flex justify-center rounded-lg p-3 text-sm font-medium ${
+            className={`flex flex-col items-center gap-1 rounded-lg p-3 text-sm font-medium ${
               isSuccess
                 ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400"
                 : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
             }`}
           >
-            {state.message}
+            <span>{state.message}</span>
+            {isSuccess && (
+              <span className="text-xs opacity-80">
+                Redirecting you to the sign in page…
+              </span>
+            )}
           </div>
         )}
 
