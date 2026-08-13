@@ -1,39 +1,23 @@
 "use server";
-import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  SESSION_COOKIE_NAME,
+  createSessionExpirationDate,
+  signSessionToken,
+  verifySessionToken,
+  DEFAULT_AUTH_URL,
+  type Session,
+} from "./sessionTokens";
 
-export type Session = {
-  user: {
-    id: number;
-    name: string;
-  };
-  // accessToken: string;
-  // refreshToken: string;
-};
-
-// get the session secret key from the environment variables
-const sessionSecretKey = process.env.SESSION_SECRET_KEY || "";
-
-// encode the session secret key
-const encodedKey = new TextEncoder().encode(sessionSecretKey);
+export type { Session };
 
 export async function createSession(payload: Session) {
-  const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const expiredAt = createSessionExpirationDate();
+  const token = await signSessionToken(payload);
 
-  // create a jwt token for the session
-  const session = await new SignJWT(payload)
-    .setProtectedHeader({
-      typ: "JWT",
-      alg: "HS256",
-    })
-    .setIssuedAt(new Date())
-    .setExpirationTime(expiredAt)
-    .sign(encodedKey);
-
-  // set the session as a http only secure cookie with lax same site
   const cookie = await cookies();
-  cookie.set("session", session, {
+  cookie.set(SESSION_COOKIE_NAME, token, {
     expires: expiredAt,
     httpOnly: true,
     secure: true,
@@ -44,24 +28,18 @@ export async function createSession(payload: Session) {
 
 export async function getSession() {
   const cookie = await cookies();
+  const token = cookie.get(SESSION_COOKIE_NAME)?.value;
+  if (!token) return null;
 
-  // get the session value from the cookie
-  const session = cookie.get("session")?.value;
-  if (!session) return null;
-
-  try {
-    // verify the session value with the encoded key
-    const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ["HS256"],
-    });
-    return payload as Session;
-  } catch (error) {
-    console.error("Error verifying session:", error);
-    redirect("/auth/signin");
+  const session = await verifySessionToken(token);
+  if (!session) {
+    console.error("Error verifying session: invalid or expired token");
+    redirect(DEFAULT_AUTH_URL);
   }
+  return session;
 }
 
 export async function destroySession() {
   const cookie = await cookies();
-  cookie.delete("session");
+  cookie.delete(SESSION_COOKIE_NAME);
 }
