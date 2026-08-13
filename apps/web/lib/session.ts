@@ -2,17 +2,18 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
+  DEFAULT_AUTH_URL,
   SESSION_COOKIE_NAME,
   createSessionExpirationDate,
   signSessionToken,
   verifySessionToken,
-  DEFAULT_AUTH_URL,
   type Session,
 } from "./sessionTokens";
 
 export type { Session };
 
 export async function createSession(payload: Session) {
+  console.log("createSession", payload);
   const expiredAt = createSessionExpirationDate();
   const token = await signSessionToken(payload);
 
@@ -26,14 +27,16 @@ export async function createSession(payload: Session) {
   });
 }
 
-export async function getSession() {
+export async function getSessionOrNull(): Promise<Session | null> {
   const cookie = await cookies();
   const token = cookie.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
+  return verifySessionToken(token);
+}
 
-  const session = await verifySessionToken(token);
+export async function getSession() {
+  const session = await getSessionOrNull();
   if (!session) {
-    console.error("Error verifying session: invalid or expired token");
     redirect(DEFAULT_AUTH_URL);
   }
   return session;

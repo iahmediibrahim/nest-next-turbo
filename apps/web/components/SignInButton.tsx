@@ -1,12 +1,12 @@
 import { logOut } from "@/lib/auth";
-import { getSession } from "@/lib/session";
+import { getSessionOrNull } from "@/lib/session";
 import { cn, getInitials } from "@/lib/utils";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 import { buttonVariants } from "./ui/button";
 
 const SignInButton = async () => {
-  const session = await getSession();
+  const session = await getSessionOrNull();
   const user = session?.user;
 
   if (!user) {

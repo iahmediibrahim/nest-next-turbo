@@ -2,20 +2,21 @@ import LogoutButton from "@/components/LogoutButton";
 import { buttonVariants } from "@/components/ui/button";
 import { logOut } from "@/lib/auth";
 import { getSession } from "@/lib/session";
-import { cn, getInitials } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   Activity,
   CreditCard,
   LayoutDashboard,
   Settings,
+  UserCircle2,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 
 export default async function Dashboard() {
   const session = await getSession();
+  console.log(session);
   const { user } = session!;
-  const initials = getInitials(user.name);
 
   const stats = [
     {
@@ -74,22 +75,37 @@ export default async function Dashboard() {
   const navItems = [
     {
       label: "Overview",
+      href: "/dashboard",
       icon: <LayoutDashboard className="h-4 w-4" />,
       active: true,
     },
-    { label: "Users", icon: <Users className="h-4 w-4" />, active: false },
+    {
+      label: "Profile",
+      href: "/dashboard/profile",
+      icon: <UserCircle2 className="h-4 w-4" />,
+      active: false,
+    },
+    {
+      label: "Users",
+      href: "#",
+      icon: <Users className="h-4 w-4" />,
+      active: false,
+    },
     {
       label: "Activity",
+      href: "#",
       icon: <Activity className="h-4 w-4" />,
       active: false,
     },
     {
       label: "Billing",
+      href: "#",
       icon: <CreditCard className="h-4 w-4" />,
       active: false,
     },
     {
       label: "Settings",
+      href: "#",
       icon: <Settings className="h-4 w-4" />,
       active: false,
     },
@@ -108,24 +124,6 @@ export default async function Dashboard() {
               Here&rsquo;s what&rsquo;s happening with your workspace today.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Avatar chip */}
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-border bg-background px-2 py-1">
-              <div
-                aria-hidden="true"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-foreground ring-1 ring-border"
-              >
-                {initials}
-              </div>
-              <span className="pr-2 text-sm font-medium text-foreground">
-                {user.name}
-              </span>
-            </div>
-            {/* Log out action */}
-            <form action={logOut}>
-              <LogoutButton label="Sign out" />
-            </form>
-          </div>
         </header>
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
@@ -135,7 +133,7 @@ export default async function Dashboard() {
               {navItems.map((item) => (
                 <Link
                   key={item.label}
-                  href="#"
+                  href={item.href}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     item.active
